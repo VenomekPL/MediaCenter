@@ -1,0 +1,17 @@
+<Config>
+  <LogLevel>info</LogLevel>
+  <Port>8989</Port>
+  <UrlBase></UrlBase>
+  <BindAddress>*</BindAddress>
+  <SslPort>9899</SslPort>
+  <EnableSsl>False</EnableSsl>
+  <ApiKey>mediacenter1234567890abcdef</ApiKey>
+  <AuthenticationMethod>None</AuthenticationMethod>
+  <EnableHardlinks>True</EnableHardlinks>
+  <RenameEpisodes>True</RenameEpisodes>
+  <StandardEpisodeFormat>{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}</StandardEpisodeFormat>
+  <Branch>main</Branch>
+  <LaunchBrowser>False</LaunchBrowser>
+  <UpdateMechanism>BuiltIn</UpdateMechanism>
+  <AnalyticsEnabled>False</AnalyticsEnabled>
+</Config>

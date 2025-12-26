@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+.venv/
+env/
+.env/
+
+# C++
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.dll
+*.exe
+*.out
+*.app
+bin/
+build/
+cmake-build-*/
+.vscode/
+.idea/
+
+# Shell
+*.log
+*.tmp
+*.swp
+
+# Docker
+.docker/
+
+# Project Specific
+config/
+.native_installed
+*.zip

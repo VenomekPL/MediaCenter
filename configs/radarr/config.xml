@@ -1,0 +1,17 @@
+<Config>
+  <LogLevel>info</LogLevel>
+  <Port>7878</Port>
+  <UrlBase></UrlBase>
+  <BindAddress>*</BindAddress>
+  <SslPort>9898</SslPort>
+  <EnableSsl>False</EnableSsl>
+  <ApiKey>mediacenter1234567890abcdef</ApiKey>
+  <AuthenticationMethod>None</AuthenticationMethod>
+  <EnableHardlinks>True</EnableHardlinks>
+  <RenameEpisodes>True</RenameEpisodes>
+  <StandardMovieFormat>{Movie Title} ({Release Year}) {Quality Full}</StandardMovieFormat>
+  <Branch>master</Branch>
+  <LaunchBrowser>False</LaunchBrowser>
+  <UpdateMechanism>BuiltIn</UpdateMechanism>
+  <AnalyticsEnabled>False</AnalyticsEnabled>
+</Config>

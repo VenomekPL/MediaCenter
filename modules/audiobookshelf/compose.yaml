@@ -1,0 +1,17 @@
+services:
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    environment:
+      - AUDIOBOOKSHELF_UID=${PUID}
+      - AUDIOBOOKSHELF_GID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_BASE_PATH}/audiobookshelf/config:/config
+      - ${CONFIG_BASE_PATH}/audiobookshelf/metadata:/metadata
+      - ${AUDIOBOOKS_PATH}:/audiobooks
+      - ${PODCASTS_PATH}:/podcasts
+    ports:
+      - ${AUDIOBOOKSHELF_PORT}:80
+    restart: unless-stopped
+    profiles: ["extended", "full"]

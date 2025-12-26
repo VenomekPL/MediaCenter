@@ -1,0 +1,15 @@
+<Config>
+  <LogLevel>info</LogLevel>
+  <Port>8686</Port>
+  <UrlBase></UrlBase>
+  <BindAddress>*</BindAddress>
+  <SslPort>9897</SslPort>
+  <EnableSsl>False</EnableSsl>
+  <ApiKey>mediacenter1234567890abcdef</ApiKey>
+  <AuthenticationMethod>None</AuthenticationMethod>
+  <EnableHardlinks>True</EnableHardlinks>
+  <Branch>master</Branch>
+  <LaunchBrowser>False</LaunchBrowser>
+  <UpdateMechanism>BuiltIn</UpdateMechanism>
+  <AnalyticsEnabled>False</AnalyticsEnabled>
+</Config>

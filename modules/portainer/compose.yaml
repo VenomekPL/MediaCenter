@@ -1,0 +1,12 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CONFIG_BASE_PATH}/portainer:/data
+    ports:
+      - ${PORTAINER_PORT}:9443
+    restart: unless-stopped
+    profiles: ["full"]

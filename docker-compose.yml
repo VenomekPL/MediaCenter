@@ -1,0 +1,17 @@
+include:
+  - modules/transmission/compose.yaml
+  - modules/radarr/compose.yaml
+  - modules/sonarr/compose.yaml
+  - modules/audiobookshelf/compose.yaml
+  - modules/lidarr/compose.yaml
+  - modules/prowlarr/compose.yaml
+  - modules/home-assistant/compose.yaml
+  - modules/portainer/compose.yaml
+  - modules/jellyfin/compose.yaml
+  - modules/nginx-proxy-manager/compose.yaml
+  - modules/watchtower/compose.yaml
+
+services:
+  # This file primarily serves as an entry point to include all modules.
+  # Individual service configurations are located in their respective module folders.
+  {}

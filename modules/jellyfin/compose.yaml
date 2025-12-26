@@ -1,0 +1,28 @@
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - JELLYFIN_PublishedServerUrl=http://localhost # Change to your IP
+    volumes:
+      - ${CONFIG_BASE_PATH}/jellyfin:/config
+      - ${MOVIES_PATH}:/data/movies
+      - ${TV_PATH}:/data/tvshows
+      - ${MUSIC_PATH}:/data/music
+      - ${BOOKS_PATH}:/data/books
+      - ${AUDIOBOOKS_PATH}:/data/audiobooks
+    ports:
+      - ${JELLYFIN_PORT}:8096
+      - 8920:8920 # HTTPS
+      - 7359:7359/udp # Discovery
+      - 1900:1900/udp # Service Discovery
+    devices:
+      - ${JELLYFIN_DRM_DEVICE}:${JELLYFIN_DRM_DEVICE}
+    restart: unless-stopped
+    profiles: ["full"]
+    # Optional: for Intel/AMD GPU
+    # group_add:
+    #   - "107" # render group ID, check with 'getent group render | cut -d: -f3'
