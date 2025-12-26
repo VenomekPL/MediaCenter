@@ -48,7 +48,7 @@ add_transmission_to_arr() {
 }
 
 add_arr_to_prowlarr() {
-    local app_port=$1
+    local internal_port=$1
     local app_name=$2
     local sync_level=$3
     echo "Adding $app_name to Prowlarr..."
@@ -62,7 +62,7 @@ add_arr_to_prowlarr() {
             "syncLevel": "'"$sync_level"'",
             "fields": [
                 {"name": "prowlarrUrl", "value": "http://prowlarr:9696"},
-                {"name": "baseUrl", "value": "http://'"${app_name,,}"':'"$app_port"'"},
+                {"name": "baseUrl", "value": "http://'"${app_name,,}"':'"$internal_port"'"},
                 {"name": "apiKey", "value": "'"$API_KEY"'"}
             ]
         }'
@@ -82,9 +82,9 @@ add_transmission_to_arr $RADARR_PORT "Radarr"
 add_transmission_to_arr $SONARR_PORT "Sonarr"
 add_transmission_to_arr $LIDARR_PORT "Lidarr"
 
-# Link Apps to Prowlarr
-add_arr_to_prowlarr $RADARR_PORT "Radarr" "fullSync"
-add_arr_to_prowlarr $SONARR_PORT "Sonarr" "fullSync"
-add_arr_to_prowlarr $LIDARR_PORT "Lidarr" "fullSync"
+# Link Apps to Prowlarr (Using internal ports)
+add_arr_to_prowlarr 7878 "Radarr" "fullSync"
+add_arr_to_prowlarr 8989 "Sonarr" "fullSync"
+add_arr_to_prowlarr 8686 "Lidarr" "fullSync"
 
 echo "Service linking complete!"

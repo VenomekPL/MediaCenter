@@ -6,7 +6,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - JELLYFIN_PublishedServerUrl=http://localhost # Change to your IP
+      - JELLYFIN_PublishedServerUrl=http://${LOCAL_IP}:${JELLYFIN_PORT}
     volumes:
       - ${CONFIG_BASE_PATH}/jellyfin:/config
       - ${MOVIES_PATH}:/data/movies

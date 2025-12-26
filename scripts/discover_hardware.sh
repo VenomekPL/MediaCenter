@@ -49,4 +49,11 @@ CURRENT_GID=$(id -g)
 sed -i "s|PUID=.*|PUID=$CURRENT_UID|" "$ENV_FILE"
 sed -i "s|PGID=.*|PGID=$CURRENT_GID|" "$ENV_FILE"
 
+# 5. Detect Local IP
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+if [ -n "$LOCAL_IP" ]; then
+    echo "Detected Local IP: $LOCAL_IP"
+    sed -i "s|LOCAL_IP=.*|LOCAL_IP=$LOCAL_IP|" "$ENV_FILE"
+fi
+
 echo "Hardware discovery complete. .env updated."
