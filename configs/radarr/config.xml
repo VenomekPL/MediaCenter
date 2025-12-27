@@ -9,7 +9,7 @@
   <AuthenticationMethod>None</AuthenticationMethod>
   <EnableHardlinks>True</EnableHardlinks>
   <RenameEpisodes>True</RenameEpisodes>
-  <StandardMovieFormat>{Movie Title} ({Release Year}) {Quality Full}</StandardMovieFormat>
+  <StandardMovieFormat>{Movie Title} ({Release Year})</StandardMovieFormat>
   <Branch>master</Branch>
   <LaunchBrowser>False</LaunchBrowser>
   <UpdateMechanism>BuiltIn</UpdateMechanism>

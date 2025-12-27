@@ -16,5 +16,7 @@
     "trash-original-torrent-files": true,
     "umask": 2,
     "watch-dir": "/watch",
-    "watch-dir-enabled": true
+    "watch-dir-enabled": true,
+    "ratio-limit": 2.0,
+    "ratio-limit-enabled": true
 }

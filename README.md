@@ -5,13 +5,12 @@ A modular, Docker-based media center solution optimized for Single Board Compute
 ## Features
 - **Native:** Kodi (with Elementum), Samba.
 - **Minimal:** Radarr, Sonarr, Transmission.
-- **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, Watchtower.
-- **Full:** Extended + Home Assistant, Portainer, Jellyfin, Nginx Proxy Manager.
+- **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, FlareSolverr, Watchtower.
+- **Full:** Extended + Home Assistant, Portainer, Jellyfin.
 
 ## Prerequisites
 - A Debian-based Linux distribution (Ubuntu, Raspberry Pi OS, etc.).
-- Docker and Docker Compose v2 installed.
-- `jq` and `curl` installed (`sudo apt install jq curl`).
+- `sudo` access.
 
 ## Quick Start
 
@@ -21,23 +20,31 @@ A modular, Docker-based media center solution optimized for Single Board Compute
    cd MediaCenter
    ```
 
-2. **Configure (Optional):**
-   Copy `.env.example` to `.env` and adjust paths or passwords if needed. The `start.sh` script will attempt to auto-discover hardware and create this for you if it doesn't exist.
+2. **Run the installer and start services:**
+   Choose a profile: `minimal`, `extended`, or `full`.
    ```bash
-   cp .env.example .env
+   ./start.sh full
+   ```
+   *Note: The first run will install Docker, Kodi, and Samba natively on your system. It will also auto-discover your hardware and configure `.env` for you.*
+
+3. **Configure (Optional):**
+   If you want to change default passwords or paths, edit the `.env` file created after the first run.
+   ```bash
    nano .env
    ```
 
-3. **Run the installer and start services:**
-   Choose a profile: `minimal`, `extended`, or `full`.
-   ```bash
-   sudo ./start.sh full
-   ```
-   *Note: The first run will install Kodi and Samba natively on your system.*
-
 ## Post-Installation
+For detailed configuration steps, including **Trakt integration** and **Quality Profiles**, please read the [Configuration Guide](docs/configuration_guide.md).
+
+- **Configuration Script:**
+  We provide a helper script to automatically link services (Radarr/Sonarr <-> Transmission/Prowlarr) and apply recommended settings.
+  ```bash
+  ./scripts/link_services.sh
+  ```
+  *Run this script after all services are up and running.*
+
 - **Kodi:** Open Kodi and install the Elementum plugin from `~/Downloads/repository.elementum.zip`.
-- **Samba:** Configure your shares in `/etc/samba/smb.conf`.
+- **Samba:** Shares are automatically configured for `Videos`, `Music`, `Books`, and `Audiobooks`. Use your system username and the password set in `.env` (`SAMBA_PASS`).
 - **Web Interfaces:**
   - Transmission: `http://<ip>:8020`
   - Radarr: `http://<ip>:8021`
@@ -47,7 +54,6 @@ A modular, Docker-based media center solution optimized for Single Board Compute
   - Audiobookshelf: `http://<ip>:8025`
   - Jellyfin: `http://<ip>:8026`
   - Home Assistant: `http://<ip>:8027`
-  - Nginx Proxy Manager: `http://<ip>:8028`
   - Portainer: `https://<ip>:9443`
 
 ## Maintenance
@@ -62,7 +68,13 @@ A modular, Docker-based media center solution optimized for Single Board Compute
   ./update.sh full
   ```
 
+- **Cleanup:**
+  Remove finished torrents from Transmission:
+  ```bash
+  ./scripts/cleanup.sh
+  ```
+
 ## Project Structure
 - `modules/`: Individual Docker Compose configurations for each service.
-- `scripts/`: Helper scripts for hardware discovery and native installation.
+- `scripts/`: Helper scripts for installation, configuration, and maintenance.
 - `config/`: (Created on run) Persistent configuration data for containers.

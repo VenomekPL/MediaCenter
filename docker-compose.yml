@@ -5,10 +5,10 @@ include:
   - modules/audiobookshelf/compose.yaml
   - modules/lidarr/compose.yaml
   - modules/prowlarr/compose.yaml
+  - modules/flaresolverr/compose.yaml
   - modules/home-assistant/compose.yaml
   - modules/portainer/compose.yaml
   - modules/jellyfin/compose.yaml
-  - modules/nginx-proxy-manager/compose.yaml
   - modules/watchtower/compose.yaml
 
 services:

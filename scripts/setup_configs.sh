@@ -17,6 +17,7 @@ PODCASTS_PATH=${PODCASTS_PATH:-~/Documents/podcasts}
 
 TRANSMISSION_USER=${TRANSMISSION_USER:-admin}
 TRANSMISSION_PASS=${TRANSMISSION_PASS:-password}
+SAMBA_PASS=${SAMBA_PASS:-password}
 CURRENT_USER=$(whoami)
 
 # Expand tilde in paths
@@ -49,29 +50,37 @@ if [ ! -f "$CONFIG_BASE_PATH/transmission/settings.json" ]; then
         configs/transmission/settings.json > "$CONFIG_BASE_PATH/transmission/settings.json"
 fi
 
+# Function to enforce API Key and Auth settings in config.xml
+enforce_arr_config() {
+    local app=$1
+    local config_file="$CONFIG_BASE_PATH/$app/config.xml"
+    local template_file="configs/$app/config.xml"
+    
+    echo "Configuring $app..."
+    
+    # If config doesn't exist, copy template
+    if [ ! -f "$config_file" ]; then
+        cp "$template_file" "$config_file"
+    else
+        echo "  - Updating existing config for $app..."
+        # Enforce API Key
+        sed -i 's|<ApiKey>.*</ApiKey>|<ApiKey>mediacenter1234567890abcdef</ApiKey>|g' "$config_file"
+        # Enforce No Auth (so scripts can access it)
+        sed -i 's|<AuthenticationMethod>.*</AuthenticationMethod>|<AuthenticationMethod>None</AuthenticationMethod>|g' "$config_file"
+    fi
+}
+
 # 2. Radarr
-if [ ! -f "$CONFIG_BASE_PATH/radarr/config.xml" ]; then
-    echo "Configuring Radarr..."
-    cp configs/radarr/config.xml "$CONFIG_BASE_PATH/radarr/config.xml"
-fi
+enforce_arr_config "radarr"
 
 # 3. Sonarr
-if [ ! -f "$CONFIG_BASE_PATH/sonarr/config.xml" ]; then
-    echo "Configuring Sonarr..."
-    cp configs/sonarr/config.xml "$CONFIG_BASE_PATH/sonarr/config.xml"
-fi
+enforce_arr_config "sonarr"
 
 # 4. Lidarr
-if [ ! -f "$CONFIG_BASE_PATH/lidarr/config.xml" ]; then
-    echo "Configuring Lidarr..."
-    cp configs/lidarr/config.xml "$CONFIG_BASE_PATH/lidarr/config.xml"
-fi
+enforce_arr_config "lidarr"
 
 # 5. Prowlarr
-if [ ! -f "$CONFIG_BASE_PATH/prowlarr/config.xml" ]; then
-    echo "Configuring Prowlarr..."
-    cp configs/prowlarr/config.xml "$CONFIG_BASE_PATH/prowlarr/config.xml"
-fi
+enforce_arr_config "prowlarr"
 
 # 6. Home Assistant
 if [ ! -f "$CONFIG_BASE_PATH/homeassistant/configuration.yaml" ]; then
@@ -84,6 +93,7 @@ fi
 
 # 7. Samba (Native)
 echo "Configuring Samba..."
+sudo mkdir -p /etc/samba
 sed -e "s|{VIDEOS_PATH}|$VIDEOS_PATH|g" \
     -e "s|{MUSIC_PATH}|$MUSIC_PATH|g" \
     -e "s|{BOOKS_PATH}|$BOOKS_PATH|g" \
@@ -91,6 +101,17 @@ sed -e "s|{VIDEOS_PATH}|$VIDEOS_PATH|g" \
     -e "s|{USER}|$CURRENT_USER|g" \
     configs/samba/smb.conf > /tmp/smb.conf
 sudo mv /tmp/smb.conf /etc/samba/smb.conf
+
+# Set Samba password for current user
+echo -e "$SAMBA_PASS\n$SAMBA_PASS" | sudo smbpasswd -a -s "$CURRENT_USER"
+
 sudo systemctl restart smbd
+
+# Fix permissions for config directory (Ensure containers can read/write)
+echo "Fixing permissions for config directory..."
+# Use PUID/PGID from .env or default to 1000
+TARGET_UID=${PUID:-1000}
+TARGET_GID=${PGID:-1000}
+chown -R $TARGET_UID:$TARGET_GID "$CONFIG_BASE_PATH"
 
 echo "Configuration setup complete."

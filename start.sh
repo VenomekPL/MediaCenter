@@ -10,10 +10,13 @@ fi
 
 echo "Starting Media Center with profile: $PROFILE..."
 
-# 1. Hardware Discovery
-./scripts/discover_hardware.sh
+# 1. Fix Environment Paths (Expand ~ to absolute paths)
+./scripts/fix_env.sh
 
-# 2. Service Configuration (Pre-seeding configs)
+# 2. Hardware Discovery
+# ./scripts/discover_hardware.sh
+
+# 3. Service Configuration (Pre-seeding configs)
 ./scripts/setup_configs.sh
 
 # 3. Native Installation (Kodi, Samba, etc.)
@@ -25,10 +28,14 @@ if [ ! -f ".native_installed" ]; then
 fi
 
 # 3. Docker Compose
-docker compose --profile "$PROFILE" up -d
+sudo docker compose --profile "$PROFILE" up -d
+
+echo "Waiting for services to initialize..."
+sleep 10
 
 # 4. Service Linking (Automation)
-# Run in background as it waits for services to be ready
-./scripts/link_services.sh &
+echo "Linking services and configuring automations..."
+./scripts/link_services.sh "$PROFILE"
 
-echo "Media Center is starting up. Check logs with 'docker compose logs -f'"
+echo "Media Center startup complete!"
+echo "Check logs with 'docker compose logs -f'"

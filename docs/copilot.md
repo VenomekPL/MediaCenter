@@ -10,8 +10,8 @@ This document serves as a persistent memory for GitHub Copilot to track project 
 
 ## Installation Levels (Docker Profiles)
 1. **Minimal:** Radarr, Sonarr, Transmission.
-2. **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, Watchtower.
-3. **Full:** Extended + Home Assistant, Portainer, Jellyfin, Nginx Proxy Manager.
+2. **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, FlareSolverr, Watchtower.
+3. **Full:** Extended + Home Assistant, Portainer, Jellyfin.
 
 ## Non-Containerized Components (Native)
 - **Kodi:** Media player (direct hardware access).
@@ -26,14 +26,14 @@ This document serves as a persistent memory for GitHub Copilot to track project 
 - **Scripts:** `start.sh`, `stop.sh`, `update.sh` in the root directory. Other scripts in `scripts/`.
 - **Automation:** `start.sh` handles hardware discovery, pre-seeding configurations, and native installation.
 - **Pre-seeding:** Default configurations for Transmission and *arr apps are stored in `configs/` and processed by `scripts/setup_configs.sh`.
-- **Service Linking:** (Planned) `scripts/link_services.sh` will use APIs to link Transmission and *arr apps automatically.
+- **Service Linking:** `scripts/link_services.sh` uses APIs to link Transmission, Prowlarr, and *arr apps automatically, and configures quality profiles/naming.
 - **Documentation:** Keep `README.md` updated with any changes to profiles, services, or installation steps.
 
 ## Important Decisions
 - **Docker Compose v2:** Utilizing profiles for installation levels.
 - **Native Kodi/Samba:** Decided for better hardware integration and performance on SBCs.
 - **Elementum over Jackett:** Using Kodi-native Elementum for torrent streaming.
-- **Containerized Nginx Proxy Manager:** Chosen for ease of use (GUI) and SSL management.
+- **FlareSolverr:** Added to handle Cloudflare challenges for indexers like 1337x.
 - **Watchtower:** Included in Extended/Full for automated container updates.
 - **Hardlinks:** Enabled in Radarr/Sonarr/Lidarr. This allows seeding from `Downloads` while having organized, renamed files in `Videos` for Samba/Kodi.
 - **Samba Strategy:** Share only the organized `Videos`, `Music`, and `Books` folders. The `Downloads` folder remains hidden from the non-technical user to avoid confusion.
@@ -47,7 +47,7 @@ This document serves as a persistent memory for GitHub Copilot to track project 
 - *arr Suite (Radarr, Sonarr, Lidarr, Prowlarr)
 - Transmission, Jellyfin, Home Assistant, Portainer, Audiobookshelf
 - Elementum (Kodi Plugin)
-- Nginx Proxy Manager (NPM)
+- FlareSolverr
 - Watchtower
 
 ## Roadblocks & Solutions
@@ -56,7 +56,10 @@ This document serves as a persistent memory for GitHub Copilot to track project 
 ## To-Do List
 - [x] Implement hardware discovery script (`scripts/discover_hardware.sh`).
 - [x] Automate `start.sh` to run discovery and native installation.
-- [ ] Configure Elementum in Kodi (via `scripts/install_native.sh`).
-- [ ] Refine Samba configuration for media sharing.
+- [x] Configure Elementum in Kodi (via `scripts/install_native.sh`).
+- [x] Refine Samba configuration for media sharing.
 - [x] Implement Nginx Proxy Manager module.
 - [x] Implement Watchtower module.
+- [x] Automate Docker installation on any device.
+- [x] Automate service linking (Transmission, *arr, Prowlarr).
+- [x] Handle missing hardware devices gracefully in Docker Compose.

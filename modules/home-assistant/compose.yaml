@@ -12,6 +12,6 @@ services:
     ports:
       - ${HA_PORT}:8123
     devices:
-      - ${HA_ZIGBEE_DEVICE}:${HA_ZIGBEE_DEVICE}
+      - ${HA_ZIGBEE_DEVICE:-/dev/null}:${HA_ZIGBEE_DEVICE:-/dev/null}
     restart: unless-stopped
     profiles: ["full"]

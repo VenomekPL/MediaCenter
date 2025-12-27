@@ -20,7 +20,7 @@ services:
       - 7359:7359/udp # Discovery
       - 1900:1900/udp # Service Discovery
     devices:
-      - ${JELLYFIN_DRM_DEVICE}:${JELLYFIN_DRM_DEVICE}
+      - ${JELLYFIN_DRM_DEVICE:-/dev/null}:${JELLYFIN_DRM_DEVICE:-/dev/null}
     restart: unless-stopped
     profiles: ["full"]
     # Optional: for Intel/AMD GPU

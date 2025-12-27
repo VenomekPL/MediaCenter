@@ -1,15 +1,10 @@
 #!/bin/bash
 
-# Default profile
-PROFILE=${1:-minimal}
+echo "Stopping and removing all Media Center containers..."
 
-if [[ ! "$PROFILE" =~ ^(minimal|extended|full)$ ]]; then
-    echo "Usage: ./stop.sh [minimal|extended|full]"
-    exit 1
-fi
+# We use the 'full' profile to ensure we target ALL services, 
+# regardless of which profile was used to start them.
+# 'down' stops and removes containers, networks, and default volumes (not named volumes).
+sudo docker compose --profile full down
 
-echo "Stopping Media Center (profile: $PROFILE)..."
-
-docker compose --profile "$PROFILE" stop
-
-echo "Media Center stopped."
+echo "Shutdown complete."

@@ -6,7 +6,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=86400 # Check every 24 hours
+      - WATCHTOWER_SCHEDULE=0 0 4 * * * # Check at 4am every day
       - TZ=${TZ}
     restart: unless-stopped
     profiles: ["extended", "full"]
