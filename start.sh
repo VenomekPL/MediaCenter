@@ -10,9 +10,6 @@ fi
 
 echo "Starting Media Center with profile: $PROFILE..."
 
-# 1. Fix Environment Paths (Expand ~ to absolute paths)
-./scripts/fix_env.sh
-
 # 2. Hardware Discovery
 # ./scripts/discover_hardware.sh
 

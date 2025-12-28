@@ -12,7 +12,7 @@ This guide explains the components of your Media Center, how to configure them, 
 *   **What it is:** Like Plex/Jellyfin, but specifically for Audiobooks and Podcasts.
 *   **How to use it:**
     1.  Go to `http://<ip>:8025`.
-    2.  Point it to your `/data/audiobooks` folder (mapped from `~/Documents/audiobooks`).
+    2.  Point it to your `/audiobooks` folder (mapped from `~/Documents/audiobooks`).
     3.  It will scan your files and provide a nice player interface for phone/browser, remembering your progress.
 
 ---

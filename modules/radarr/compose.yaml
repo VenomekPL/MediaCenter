@@ -8,8 +8,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${CONFIG_BASE_PATH}/radarr:/config
-      - ${MOVIES_PATH}:/movies
-      - ${DOWNLOADS_PATH}:/downloads
+      - ${DATA_ROOT_PATH}:/data
     ports:
       - ${RADARR_PORT}:7878
     restart: unless-stopped

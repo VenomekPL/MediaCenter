@@ -460,16 +460,25 @@ if [[ "$PROFILE" == "extended" || "$PROFILE" == "full" ]]; then
     add_prowlarr_indexers
 fi
 
-add_root_folder $RADARR_PORT "/movies"
-add_root_folder $SONARR_PORT "/tv"
-configure_radarr_quality
-configure_sonarr_quality
-configure_radarr_naming
-configure_radarr_media_management
-configure_sonarr_naming
-configure_sonarr_media_management
-add_trakt_list $RADARR_PORT "Radarr" "/movies"
-add_trakt_list $SONARR_PORT "Sonarr" "/tv"
+add_root_folder $RADARR_PORT "/data/Videos/Movies"
+add_root_folder $SONARR_PORT "/data/Videos/TvSeries"
+
+# Only apply destructive configurations (Naming, Quality, Media Management) once
+if [ ! -f ".config_applied" ]; then
+    echo "Applying initial configuration (Naming, Quality, Media Management)..."
+    configure_radarr_quality
+    configure_sonarr_quality
+    configure_radarr_naming
+    configure_radarr_media_management
+    configure_sonarr_naming
+    configure_sonarr_media_management
+    touch .config_applied
+else
+    echo "Skipping initial configuration (already applied)."
+fi
+
+add_trakt_list $RADARR_PORT "Radarr" "/data/Videos/Movies"
+add_trakt_list $SONARR_PORT "Sonarr" "/data/Videos/TvSeries"
 trigger_library_rescan
 
 echo "Service linking complete!"

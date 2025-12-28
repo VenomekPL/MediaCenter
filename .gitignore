@@ -49,6 +49,13 @@ cmake-build-*/
 .docker/
 
 # Project Specific
+.env
+.config_applied
+.native_installed
+config/
+collections.json
+
+# Project Specific
 config/
 .native_installed
 *.zip

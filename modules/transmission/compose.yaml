@@ -10,8 +10,7 @@ services:
       - PASS=${TRANSMISSION_PASS}
     volumes:
       - ${CONFIG_BASE_PATH}/transmission:/config
-      - ${DOWNLOADS_PATH}:/downloads
-      - ${DOWNLOADS_PATH}/watch:/watch
+      - ${DATA_ROOT_PATH}:/data
     ports:
       - ${TRANSMISSION_PORT}:9091
       - 51413:51413

@@ -7,6 +7,7 @@ A modular, Docker-based media center solution optimized for Single Board Compute
 - **Minimal:** Radarr, Sonarr, Transmission.
 - **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, FlareSolverr, Watchtower.
 - **Full:** Extended + Home Assistant, Portainer, Jellyfin.
+- **Optimized Storage:** Uses "Unified Root" architecture (`/data`) to enable **Hardlinks**. Downloads are instantly imported to the library without taking up double space.
 
 ## Prerequisites
 - A Debian-based Linux distribution (Ubuntu, Raspberry Pi OS, etc.).

@@ -35,7 +35,11 @@ This document serves as a persistent memory for GitHub Copilot to track project 
 - **Elementum over Jackett:** Using Kodi-native Elementum for torrent streaming.
 - **FlareSolverr:** Added to handle Cloudflare challenges for indexers like 1337x.
 - **Watchtower:** Included in Extended/Full for automated container updates.
-- **Hardlinks:** Enabled in Radarr/Sonarr/Lidarr. This allows seeding from `Downloads` while having organized, renamed files in `Videos` for Samba/Kodi.
+- **Hardlinks & Unified Root:** 
+  - Implemented "Unified Root" architecture to enable atomic moves and hardlinks.
+  - All containers mount the host's `DATA_ROOT_PATH` (default: `~`) to `/data`.
+  - Internal paths: `/data/Downloads`, `/data/Videos/Movies`, `/data/Videos/TvSeries`.
+  - This prevents double space usage and allows instant imports.
 - **Samba Strategy:** Share only the organized `Videos`, `Music`, and `Books` folders. The `Downloads` folder remains hidden from the non-technical user to avoid confusion.
 - **Cleanup:** `scripts/cleanup.sh` is called by `update.sh`. It removes finished torrents via Transmission API and deletes "dangling" files (link count = 1) in `Downloads` that aren't in the library.
 - **Standardized Ports:** All web interfaces mapped to the 8020-8028 range for consistency, while keeping Portainer on 9443.
