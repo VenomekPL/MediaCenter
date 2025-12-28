@@ -1,7 +1,7 @@
 {
     "download-dir": "/data/Downloads",
     "incomplete-dir": "/data/Downloads/incomplete",
-    "incomplete-dir-enabled": true,
+    "incomplete-dir-enabled": false,
     "rpc-authentication-required": true,
     "rpc-bind-address": "0.0.0.0",
     "rpc-enabled": true,
@@ -18,5 +18,7 @@
     "watch-dir": "/data/Downloads/watch",
     "watch-dir-enabled": true,
     "ratio-limit": 2.0,
-    "ratio-limit-enabled": true
+    "ratio-limit-enabled": true,
+    "download-queue-enabled": false,
+    "seed-queue-enabled": false
 }
