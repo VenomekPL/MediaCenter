@@ -19,6 +19,8 @@
     "watch-dir-enabled": true,
     "ratio-limit": 2.0,
     "ratio-limit-enabled": true,
+    "peer-limit-global": 1500,
+    "peer-limit-per-torrent": 200,
     "download-queue-enabled": false,
     "seed-queue-enabled": false
 }
