@@ -1,4 +1,5 @@
 {
+    "cache-size-mb": 512,
     "download-dir": "/data/Downloads",
     "incomplete-dir": "/data/Downloads/incomplete",
     "incomplete-dir-enabled": false,
