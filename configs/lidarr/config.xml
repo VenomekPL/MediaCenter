@@ -10,6 +10,6 @@
   <EnableHardlinks>True</EnableHardlinks>
   <Branch>master</Branch>
   <LaunchBrowser>False</LaunchBrowser>
-  <UpdateMechanism>BuiltIn</UpdateMechanism>
+  <UpdateMechanism>Docker</UpdateMechanism>
   <AnalyticsEnabled>False</AnalyticsEnabled>
 </Config>
