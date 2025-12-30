@@ -9,6 +9,7 @@ services:
     volumes:
       - ${CONFIG_BASE_PATH}/radarr:/config
       - ${DATA_ROOT_PATH}:/data
+      - ${DOWNLOADS_PATH}:/downloads
     ports:
       - ${RADARR_PORT}:7878
     restart: unless-stopped

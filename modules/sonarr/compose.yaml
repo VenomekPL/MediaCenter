@@ -9,6 +9,7 @@ services:
     volumes:
       - ${CONFIG_BASE_PATH}/sonarr:/config
       - ${DATA_ROOT_PATH}:/data
+      - ${DOWNLOADS_PATH}:/downloads
     ports:
       - ${SONARR_PORT}:8989
     restart: unless-stopped

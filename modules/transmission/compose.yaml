@@ -11,6 +11,7 @@ services:
     volumes:
       - ${CONFIG_BASE_PATH}/transmission:/config
       - ${DATA_ROOT_PATH}:/data
+      - ${DOWNLOADS_PATH}:/downloads
     ports:
       - ${TRANSMISSION_PORT}:9091
       - 51413:51413

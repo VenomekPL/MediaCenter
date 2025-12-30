@@ -9,6 +9,7 @@ services:
     volumes:
       - ${CONFIG_BASE_PATH}/lidarr:/config
       - ${DATA_ROOT_PATH}:/data
+      - ${DOWNLOADS_PATH}:/downloads
     ports:
       - ${LIDARR_PORT}:8686
     restart: unless-stopped
