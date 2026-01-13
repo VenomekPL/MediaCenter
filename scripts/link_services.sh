@@ -438,6 +438,8 @@ add_prowlarr_indexers() {
     add_cardigann_indexer "The Pirate Bay" "thepiratebay" "true"
     add_cardigann_indexer "Nyaa" "nyaasi" "false"
     add_cardigann_indexer "1337x" "1337x" "true"
+    add_cardigann_indexer "TorrentGalaxy" "torrentgalaxy" "true"
+    add_cardigann_indexer "YTS" "yts" "false"
 }
 
 trigger_library_rescan() {
