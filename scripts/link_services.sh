@@ -89,6 +89,48 @@ add_transmission_to_arr() {
     fi
 }
 
+add_transmission_to_prowlarr() {
+    local port=$PROWLARR_PORT
+    
+    echo "Configuring Transmission for Prowlarr..."
+    
+    # Check if client exists
+    local existing_client=$(curl -s "http://$IP:$port/api/v1/downloadclient?apiKey=$API_KEY" | jq -r '.[] | select(.name == "Transmission")')
+    
+    local payload='{
+        "name": "Transmission",
+        "implementation": "Transmission",
+        "configContract": "TransmissionSettings",
+        "enable": true,
+        "protocol": "torrent",
+        "priority": 1,
+        "tags": [],
+        "categories": [],
+        "fields": [
+            {"name": "host", "value": "transmission"},
+            {"name": "port", "value": 9091},
+            {"name": "username", "value": "'"$TRANSMISSION_USER"'"},
+            {"name": "password", "value": "'"$TRANSMISSION_PASS"'"},
+            {"name": "category", "value": "prowlarr"}
+        ]
+    }'
+
+    if [ -n "$existing_client" ]; then
+        local id=$(echo "$existing_client" | jq -r '.id')
+        echo "  - Updating existing client (ID: $id)..."
+        # Merge existing ID into payload
+        payload=$(echo "$payload" | jq ".id = $id")
+        curl -s -X PUT "http://$IP:$port/api/v1/downloadclient/$id?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload" > /dev/null
+    else
+        echo "  - Creating new client..."
+        curl -s -X POST "http://$IP:$port/api/v1/downloadclient?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload" > /dev/null
+    fi
+}
+
 add_arr_to_prowlarr() {
     local internal_port=$1
     local app_name=$2
@@ -125,6 +167,10 @@ fi
 # Link Transmission
 add_transmission_to_arr $RADARR_PORT "Radarr" "movieCategory"
 add_transmission_to_arr $SONARR_PORT "Sonarr" "tvCategory"
+if [[ "$PROFILE" == "extended" || "$PROFILE" == "full" ]]; then
+    add_transmission_to_prowlarr
+fi 
+
 # Lidarr uses v1 API for download clients usually, but let's try v3 endpoint first as it might be compatible or proxied.
 # If not, we might need a separate function for Lidarr.
 # Checking Lidarr API docs, it supports /api/v1/downloadclient. 
@@ -439,7 +485,7 @@ add_prowlarr_indexers() {
     add_cardigann_indexer "Nyaa" "nyaasi" "false"
     add_cardigann_indexer "1337x" "1337x" "true"
     add_cardigann_indexer "TorrentGalaxy" "torrentgalaxy" "true"
-    add_cardigann_indexer "YTS" "yts" "false"
+    add_cardigann_indexer "YTS" "yts" "true"
 }
 
 trigger_library_rescan() {

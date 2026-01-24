@@ -75,6 +75,18 @@ For detailed configuration steps, including **Trakt integration** and **Quality 
   ./scripts/cleanup.sh
   ```
 
+- **Deduplication:**
+  Fix broken hardlinks and reclaim space:
+  ```bash
+  ./scripts/deduplicate.py
+  ```
+  *See [Duplicate Removal Guide](docs/duplicate_removal.md) for details.*
+
+## Documentation
+- [Configuration Guide](docs/configuration_guide.md): Detailed setup instructions.
+- [Duplicate Removal](docs/duplicate_removal.md): How to fix hardlinks and save space.
+- [Copilot Context](docs/copilot.md): Project rules and architectural decisions.
+
 ## Project Structure
 - `modules/`: Individual Docker Compose configurations for each service.
 - `scripts/`: Helper scripts for installation, configuration, and maintenance.
