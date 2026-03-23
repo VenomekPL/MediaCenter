@@ -42,6 +42,7 @@ This document serves as a persistent memory for GitHub Copilot to track project 
   - This prevents double space usage and allows instant imports.
 - **Samba Strategy:** Share only the organized `Videos`, `Music`, and `Books` folders. The `Downloads` folder remains hidden from the non-technical user to avoid confusion.
 - **Cleanup:** `scripts/cleanup.sh` is called by `update.sh`. It removes finished torrents via Transmission API and deletes "dangling" files (link count = 1) in `Downloads` that aren't in the library.
+- **Library Audit:** `scripts/library_audit.py` performs deep audit: finds duplicates, re-hardlinks orphans, remaps anime absolute numbering, cross-checks Sonarr/Radarr tracking vs disk, and triggers rescans. Supports `--dry-run`. See `.github/skills/media-library-cleanup/` for the full cleanup skill.
 - **Standardized Ports:** All web interfaces mapped to the 8020-8028 range for consistency, while keeping Portainer on 9443.
 
 ## Technologies Used
