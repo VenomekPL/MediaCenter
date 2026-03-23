@@ -1,4 +1,5 @@
 include:
+  - modules/gluetun/compose.yaml
   - modules/transmission/compose.yaml
   - modules/radarr/compose.yaml
   - modules/sonarr/compose.yaml

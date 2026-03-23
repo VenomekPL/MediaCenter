@@ -8,6 +8,7 @@ A modular, Docker-based media center solution optimized for Single Board Compute
 - **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, FlareSolverr, Watchtower.
 - **Full:** Extended + Home Assistant, Portainer, Jellyfin.
 - **Optimized Storage:** Uses "Unified Root" architecture (`/data`) to enable **Hardlinks**. Downloads are instantly imported to the library without taking up double space.
+- **VPN Protected:** All torrent traffic is routed through an encrypted VPN tunnel ([Gluetun](https://github.com/qdm12/gluetun)), keeping your activity private from your ISP. Built-in **kill switch** ensures torrents stop immediately if the VPN drops — no leaks, ever.
 
 ## Prerequisites
 - A Debian-based Linux distribution (Ubuntu, Raspberry Pi OS, etc.).
@@ -28,11 +29,17 @@ A modular, Docker-based media center solution optimized for Single Board Compute
    ```
    *Note: The first run will install Docker, Kodi, and Samba natively on your system. It will also auto-discover your hardware and configure `.env` for you.*
 
-3. **Configure (Optional):**
-   If you want to change default passwords or paths, edit the `.env` file created after the first run.
+3. **Configure VPN (Required):**
+   Edit the `.env` file and fill in your VPN provider credentials. All torrent traffic is routed through this tunnel.
    ```bash
    nano .env
    ```
+   We recommend using WireGuard with **Mullvad** (€5/mo, no-logs, no email needed).
+   See the [VPN Setup Guide](docs/vpn_setup.md) for detailed instructions. At minimum, set:
+   - `VPN_SERVICE_PROVIDER` — `custom` (recommended) or a provider name
+   - `VPN_TYPE` — `wireguard` (recommended) or `openvpn`
+   - `WIREGUARD_PRIVATE_KEY` / `WIREGUARD_ADDRESSES` (from your downloaded `.conf`)
+   - `WIREGUARD_PUBLIC_KEY` / `WIREGUARD_ENDPOINT_IP` / `WIREGUARD_ENDPOINT_PORT` (for custom provider)
 
 ## Post-Installation
 For detailed configuration steps, including **Trakt integration** and **Quality Profiles**, please read the [Configuration Guide](docs/configuration_guide.md).
@@ -84,6 +91,7 @@ For detailed configuration steps, including **Trakt integration** and **Quality 
 
 ## Documentation
 - [Configuration Guide](docs/configuration_guide.md): Detailed setup instructions.
+- [VPN Setup Guide](docs/vpn_setup.md): How the VPN tunnel and kill switch work.
 - [Duplicate Removal](docs/duplicate_removal.md): How to fix hardlinks and save space.
 - [Copilot Context](docs/copilot.md): Project rules and architectural decisions.
 

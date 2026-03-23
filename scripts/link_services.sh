@@ -65,7 +65,7 @@ add_transmission_to_arr() {
         "protocol": "torrent",
         "priority": 1,
         "fields": [
-            {"name": "host", "value": "transmission"},
+            {"name": "host", "value": "gluetun"},
             {"name": "port", "value": 9091},
             {"name": "username", "value": "'"$TRANSMISSION_USER"'"},
             {"name": "password", "value": "'"$TRANSMISSION_PASS"'"},
@@ -107,7 +107,7 @@ add_transmission_to_prowlarr() {
         "tags": [],
         "categories": [],
         "fields": [
-            {"name": "host", "value": "transmission"},
+            {"name": "host", "value": "gluetun"},
             {"name": "port", "value": 9091},
             {"name": "username", "value": "'"$TRANSMISSION_USER"'"},
             {"name": "password", "value": "'"$TRANSMISSION_PASS"'"},

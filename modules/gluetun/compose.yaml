@@ -1,0 +1,48 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TZ=${TZ}
+      # VPN Provider — set in .env (e.g., mullvad, nordvpn, protonvpn, surfshark)
+      # Full list: https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER:-mullvad}
+      - VPN_TYPE=${VPN_TYPE:-wireguard}
+      # WireGuard settings
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY:-}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES:-}
+      # Custom provider additional fields (ignored by named providers)
+      - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY:-}
+      - WIREGUARD_ENDPOINT_IP=${WIREGUARD_ENDPOINT_IP:-}
+      - WIREGUARD_ENDPOINT_PORT=${WIREGUARD_ENDPOINT_PORT:-51820}
+      # Server selection (for named providers like mullvad)
+      - SERVER_COUNTRIES=${VPN_SERVER_COUNTRIES:-}
+      - SERVER_CITIES=${VPN_SERVER_CITIES:-}
+      # DNS — use public DNS so healthcheck works even during tunnel setup
+      - DNS_ADDRESS=1.1.1.1
+      # --- Kill Switch & Firewall ---
+      - FIREWALL_VPN_INPUT_PORTS=${FIREWALL_VPN_INPUT_PORTS:-51413}
+      - FIREWALL_INPUT_PORTS=${FIREWALL_INPUT_PORTS:-9091}
+      - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS:-172.16.0.0/12}
+      # Health check timing
+      - HEALTH_VPN_DURATION_INITIAL=30s
+      - HEALTH_SUCCESS_WAIT_DURATION=10s
+    volumes:
+      - ${CONFIG_BASE_PATH}/gluetun:/gluetun
+    # Transmission's ports must be defined here since it shares this network
+    ports:
+      - ${TRANSMISSION_PORT:-8020}:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
+    profiles: ["minimal", "extended", "full"]
+    healthcheck:
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

@@ -10,6 +10,27 @@ fi
 
 echo "Starting Media Center with profile: $PROFILE..."
 
+# 1. VPN Configuration Check
+if [ -f .env ]; then
+    source <(grep -v '^#' .env | sed 's/^/export /')
+fi
+VPN_PROVIDER="${VPN_SERVICE_PROVIDER:-}"
+VPN_KEY="${WIREGUARD_PRIVATE_KEY:-}"
+OVPN_USER="${OPENVPN_USER:-}"
+if [ -z "$VPN_PROVIDER" ] || { [ -z "$VPN_KEY" ] && [ -z "$OVPN_USER" ]; }; then
+    echo "============================================"
+    echo "  WARNING: VPN is NOT configured!"
+    echo "  Torrent traffic will have NO encryption."
+    echo "  Edit .env and set VPN_SERVICE_PROVIDER"
+    echo "  and your WireGuard/OpenVPN credentials."
+    echo "============================================"
+    read -rp "Continue without VPN? (y/N): " vpn_confirm
+    if [[ ! "$vpn_confirm" =~ ^[Yy]$ ]]; then
+        echo "Aborted. Configure VPN in .env first."
+        exit 1
+    fi
+fi
+
 # 2. Hardware Discovery
 # ./scripts/discover_hardware.sh
 

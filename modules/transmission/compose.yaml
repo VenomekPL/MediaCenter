@@ -2,6 +2,11 @@ services:
   transmission:
     image: lscr.io/linuxserver/transmission:latest
     container_name: transmission
+    # Route ALL traffic through the Gluetun VPN tunnel
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -12,9 +17,6 @@ services:
       - ${CONFIG_BASE_PATH}/transmission:/config
       - ${DATA_ROOT_PATH}:/data
       - ${DOWNLOADS_PATH}:/downloads
-    ports:
-      - ${TRANSMISSION_PORT}:9091
-      - 51413:51413
-      - 51413:51413/udp
+    # Ports are defined on gluetun container (network owner)
     restart: unless-stopped
     profiles: ["minimal", "extended", "full"]
