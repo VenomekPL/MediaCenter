@@ -18,6 +18,7 @@ PODCASTS_PATH=${PODCASTS_PATH:-~/Documents/podcasts}
 TRANSMISSION_USER=${TRANSMISSION_USER:-admin}
 TRANSMISSION_PASS=${TRANSMISSION_PASS:-password}
 SAMBA_PASS=${SAMBA_PASS:-password}
+API_KEY=${API_KEY:-mediacenter1234567890abcdef}
 CURRENT_USER=$(whoami)
 
 # Expand tilde in paths
@@ -58,13 +59,13 @@ enforce_arr_config() {
     
     echo "Configuring $app..."
     
-    # If config doesn't exist, copy template
+    # If config doesn't exist, copy template with API key substitution
     if [ ! -f "$config_file" ]; then
-        cp "$template_file" "$config_file"
+        sed -e "s|{API_KEY}|$API_KEY|g" "$template_file" > "$config_file"
     else
         echo "  - Updating existing config for $app..."
         # Enforce API Key
-        sed -i 's|<ApiKey>.*</ApiKey>|<ApiKey>mediacenter1234567890abcdef</ApiKey>|g' "$config_file"
+        sed -i "s|<ApiKey>.*</ApiKey>|<ApiKey>$API_KEY</ApiKey>|g" "$config_file"
         # Enforce No Auth (so scripts can access it)
         sed -i 's|<AuthenticationMethod>.*</AuthenticationMethod>|<AuthenticationMethod>None</AuthenticationMethod>|g' "$config_file"
     fi

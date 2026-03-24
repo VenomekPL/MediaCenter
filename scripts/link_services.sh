@@ -8,8 +8,12 @@ if [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
-API_KEY="mediacenter1234567890abcdef"
+API_KEY="${API_KEY:-mediacenter1234567890abcdef}"
 IP="localhost"
+
+# Credentials from .env or defaults
+TRANSMISSION_USER=${TRANSMISSION_USER:-admin}
+TRANSMISSION_PASS=${TRANSMISSION_PASS:-password}
 
 # Ports from .env or defaults
 TRANSMISSION_PORT=${TRANSMISSION_PORT:-8020}

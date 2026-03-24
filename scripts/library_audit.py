@@ -15,13 +15,27 @@ from collections import defaultdict
 import urllib.request
 
 # ── Configuration ──────────────────────────────────────────────
-DOWNLOADS = Path(os.path.expanduser("~/Downloads"))
-TV_LIBRARY = Path(os.path.expanduser("~/Videos/TvSeries"))
-MOVIE_LIBRARY = Path(os.path.expanduser("~/Videos/Movies"))
+# Read from .env file if it exists, otherwise use defaults
+def _load_env():
+    """Load .env file from project root."""
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, val = line.partition("=")
+                    os.environ.setdefault(key.strip(), val.strip())
 
-SONARR_URL = "http://localhost:8022"
-RADARR_URL = "http://localhost:8021"
-API_KEY = "mediacenter1234567890abcdef"
+_load_env()
+
+DOWNLOADS = Path(os.path.expanduser(os.environ.get("DOWNLOADS_PATH", "~/Downloads")))
+TV_LIBRARY = Path(os.path.expanduser(os.environ.get("TV_PATH", "~/Videos/TvSeries")))
+MOVIE_LIBRARY = Path(os.path.expanduser(os.environ.get("MOVIES_PATH", "~/Videos/Movies")))
+
+SONARR_URL = f"http://localhost:{os.environ.get('SONARR_PORT', '8022')}"
+RADARR_URL = f"http://localhost:{os.environ.get('RADARR_PORT', '8021')}"
+API_KEY = os.environ.get("API_KEY", "mediacenter1234567890abcdef")
 
 MEDIA_EXTS = {".mkv", ".mp4", ".avi", ".m4v", ".wmv", ".flv", ".ts"}
 SUB_EXTS = {".srt", ".sub", ".ass", ".ssa", ".idx", ".vtt"}

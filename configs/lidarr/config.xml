@@ -5,7 +5,7 @@
   <BindAddress>*</BindAddress>
   <SslPort>9897</SslPort>
   <EnableSsl>False</EnableSsl>
-  <ApiKey>mediacenter1234567890abcdef</ApiKey>
+  <ApiKey>{API_KEY}</ApiKey>
   <AuthenticationMethod>None</AuthenticationMethod>
   <EnableHardlinks>True</EnableHardlinks>
   <Branch>master</Branch>
