@@ -418,7 +418,7 @@ def main():
             if p.exists():
                 on_disk = sum(1 for f in p.rglob("*")
                               if f.is_file() and f.suffix.lower() in MEDIA_EXTS)
-                reported = s.get("episodeFileCount", 0)
+                reported = s.get("statistics", {}).get("episodeFileCount", 0)
                 if on_disk > 0 and reported == 0:
                     print(f"  ⚠️  {s['title']}: {on_disk} files on disk but Sonarr says 0 — needs rescan")
                 elif on_disk > reported:
