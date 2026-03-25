@@ -73,7 +73,7 @@ add_transmission_to_arr() {
             {"name": "port", "value": 9091},
             {"name": "username", "value": "'"$TRANSMISSION_USER"'"},
             {"name": "password", "value": "'"$TRANSMISSION_PASS"'"},
-            {"name": "'"$category_field"'", "value": ""}
+            {"name": "'"$category_field"'", "value": "'"${name,,}"'"}
         ]
     }'
 

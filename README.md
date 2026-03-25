@@ -117,8 +117,11 @@ python3 scripts/find_space_wasters.py
 ```
 ~/                          ← DATA_ROOT_PATH (mounted as /data in containers)
 ├── Downloads/              ← Transmission downloads here
-│   └── Movie.Name.2024/   ← Torrent folder
-│       └── movie.mkv
+│   ├── radarr/             ← Movies (category set by Radarr)
+│   │   └── Movie.Name.2024/
+│   │       └── movie.mkv
+│   ├── sonarr/             ← TV (category set by Sonarr)
+│   └── lidarr/             ← Music (category set by Lidarr)
 └── Videos/
     ├── Movies/             ← Radarr library (hardlinked from Downloads)
     │   └── Movie Name (2024)/
@@ -132,6 +135,8 @@ python3 scripts/find_space_wasters.py
 **Hardlinks** mean the movie file in `Videos/` and the one in `Downloads/` are the **same file on disk** — zero extra space. When `cleanup.sh` removes finished torrents, the library copy remains.
 
 **VPN routing:** Transmission runs inside Gluetun's network (`network_mode: service:gluetun`). All *arr apps connect to Transmission at `gluetun:9091` (not `transmission:9091`). The kill switch blocks all traffic if the VPN tunnel drops.
+
+**Download categories:** Each *arr app uses a dedicated Transmission category (`radarr`, `sonarr`, `lidarr`). This creates subdirectories under `Downloads/` (e.g. `Downloads/radarr/`) so each app only sees its own downloads. Without categories, every app sees *all* Transmission torrents in its queue, causing phantom "stuck" items and cross-contamination. Categories are set automatically by `link_services.sh`.
 
 ## Project Structure
 ```
@@ -158,6 +163,7 @@ python3 scripts/find_space_wasters.py
 │   ├── link_services.sh    ← Auto-connects all services via API
 │   ├── install_native.sh   ← Installs Docker, Kodi, Samba
 │   ├── cleanup.sh          ← Removes finished torrents
+│   ├── discover_hardware.sh ← Detects HW accel devices for .env
 │   ├── library_audit.py    ← Library health: dupes, orphans, tracking
 │   ├── deduplicate.py      ← Hardlink deduplication
 │   └── find_space_wasters.py ← Space usage analysis
