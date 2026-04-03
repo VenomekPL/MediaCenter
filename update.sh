@@ -14,7 +14,7 @@ echo "Updating Media Center images (profile: $PROFILE)..."
 ./scripts/cleanup.sh
 
 # 2. Stop and Update
-docker compose --profile "$PROFILE" pull
-docker compose --profile "$PROFILE" up -d --remove-orphans
+sudo docker compose --profile "$PROFILE" pull
+sudo docker compose --profile "$PROFILE" up -d --remove-orphans
 
 echo "Media Center updated and restarted."

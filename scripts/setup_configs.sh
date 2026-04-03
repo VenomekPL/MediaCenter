@@ -34,8 +34,9 @@ VIDEOS_PATH=$(dirname "$MOVIES_PATH")
 echo "Setting up service configurations..."
 
 # Create base directories
-mkdir -p "$CONFIG_BASE_PATH"/{transmission,radarr,sonarr,lidarr,prowlarr,homeassistant}
-mkdir -p "$DOWNLOADS_PATH/incomplete"
+mkdir -p "$CONFIG_BASE_PATH"/{transmission,radarr,sonarr,lidarr,prowlarr,homeassistant,gluetun,jellyfin,portainer}
+mkdir -p "$CONFIG_BASE_PATH/audiobookshelf"/{config,metadata}
+mkdir -p "$DOWNLOADS_PATH"/{incomplete,watch}
 mkdir -p "$MOVIES_PATH"
 mkdir -p "$TV_PATH"
 mkdir -p "$MUSIC_PATH"
@@ -108,11 +109,12 @@ echo -e "$SAMBA_PASS\n$SAMBA_PASS" | sudo smbpasswd -a -s "$CURRENT_USER"
 
 sudo systemctl restart smbd
 
-# Fix permissions for config directory (Ensure containers can read/write)
-echo "Fixing permissions for config directory..."
+# Fix permissions for config and media directories (Ensure containers can read/write)
+echo "Fixing permissions..."
 # Use PUID/PGID from .env or default to 1000
 TARGET_UID=${PUID:-1000}
 TARGET_GID=${PGID:-1000}
 chown -R $TARGET_UID:$TARGET_GID "$CONFIG_BASE_PATH"
+chown -R $TARGET_UID:$TARGET_GID "$DOWNLOADS_PATH" "$MOVIES_PATH" "$TV_PATH" "$MUSIC_PATH" "$BOOKS_PATH" "$AUDIOBOOKS_PATH" "$PODCASTS_PATH" 2>/dev/null || true
 
 echo "Configuration setup complete."

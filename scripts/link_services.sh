@@ -77,19 +77,26 @@ add_transmission_to_arr() {
         ]
     }'
 
+    local response status
     if [ -n "$existing_client" ]; then
         local id=$(echo "$existing_client" | jq -r '.id')
         echo "  - Updating existing client (ID: $id)..."
         # Merge existing ID into payload
         payload=$(echo "$payload" | jq ".id = $id")
-        curl -s -X PUT "http://$IP:$port/api/$api_version/downloadclient/$id?apiKey=$API_KEY" \
+        response=$(curl -s -w "\n%{http_code}" -X PUT "http://$IP:$port/api/$api_version/downloadclient/$id?apiKey=$API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$payload" > /dev/null
+            -d "$payload")
     else
         echo "  - Creating new client..."
-        curl -s -X POST "http://$IP:$port/api/$api_version/downloadclient?apiKey=$API_KEY" \
+        response=$(curl -s -w "\n%{http_code}" -X POST "http://$IP:$port/api/$api_version/downloadclient?apiKey=$API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$payload" > /dev/null
+            -d "$payload")
+    fi
+    status=$(echo "$response" | tail -1)
+    if [[ "$status" =~ ^2 ]]; then
+        echo "  - Transmission configured for $name successfully."
+    else
+        echo "  - ERROR: Failed to configure Transmission for $name (HTTP $status)"
     fi
 }
 
@@ -119,19 +126,26 @@ add_transmission_to_prowlarr() {
         ]
     }'
 
+    local response status
     if [ -n "$existing_client" ]; then
         local id=$(echo "$existing_client" | jq -r '.id')
         echo "  - Updating existing client (ID: $id)..."
         # Merge existing ID into payload
         payload=$(echo "$payload" | jq ".id = $id")
-        curl -s -X PUT "http://$IP:$port/api/v1/downloadclient/$id?apiKey=$API_KEY" \
+        response=$(curl -s -w "\n%{http_code}" -X PUT "http://$IP:$port/api/v1/downloadclient/$id?apiKey=$API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$payload" > /dev/null
+            -d "$payload")
     else
         echo "  - Creating new client..."
-        curl -s -X POST "http://$IP:$port/api/v1/downloadclient?apiKey=$API_KEY" \
+        response=$(curl -s -w "\n%{http_code}" -X POST "http://$IP:$port/api/v1/downloadclient?apiKey=$API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$payload" > /dev/null
+            -d "$payload")
+    fi
+    status=$(echo "$response" | tail -1)
+    if [[ "$status" =~ ^2 ]]; then
+        echo "  - Transmission configured for Prowlarr successfully."
+    else
+        echo "  - ERROR: Failed to configure Transmission for Prowlarr (HTTP $status)"
     fi
 }
 
@@ -204,8 +218,9 @@ fi
 add_root_folder() {
     local port=$1
     local path=$2
+    local api_version=${3:-v3}
     echo "Adding Root Folder '$path' to service on port $port..."
-    curl -s -X POST "http://$IP:$port/api/v3/rootfolder?apiKey=$API_KEY" \
+    curl -s -X POST "http://$IP:$port/api/$api_version/rootfolder?apiKey=$API_KEY" \
         -H "Content-Type: application/json" \
         -d '{ "path": "'"$path"'" }' > /dev/null
 }
@@ -514,6 +529,9 @@ fi
 
 add_root_folder $RADARR_PORT "/data/Videos/Movies"
 add_root_folder $SONARR_PORT "/data/Videos/TvSeries"
+if [[ "$PROFILE" == "extended" || "$PROFILE" == "full" ]]; then
+    add_root_folder $LIDARR_PORT "/data/Music" "v1"
+fi
 
 # Only apply destructive configurations (Naming, Quality, Media Management) once
 if [ ! -f ".config_applied" ]; then

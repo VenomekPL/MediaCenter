@@ -52,9 +52,9 @@ fi
 echo "Checking for dangling files in $DOWNLOADS_PATH..."
 
 # We only look for files older than 1 hour to avoid deleting active downloads that just started
-find "$DOWNLOADS_PATH" -type f -links 1 -mmin +60 -not -path "*/incomplete/*" -delete
+find "$DOWNLOADS_PATH" -type f -links 1 -mmin +60 -not -path "*/incomplete/*" -not -path "*/watch/*" -delete
 
-# Clean up empty directories in Downloads
-find "$DOWNLOADS_PATH" -type d -empty -not -path "$DOWNLOADS_PATH" -delete
+# Clean up empty directories in Downloads (preserve incomplete and watch)
+find "$DOWNLOADS_PATH" -type d -empty -not -path "$DOWNLOADS_PATH" -not -name "incomplete" -not -name "watch" -delete
 
 echo "Cleanup complete."

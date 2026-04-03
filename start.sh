@@ -49,7 +49,7 @@ fi
 sudo docker compose --profile "$PROFILE" up -d
 
 echo "Waiting for services to initialize..."
-sleep 10
+sleep 15
 
 # 4. Service Linking (Automation)
 echo "Linking services and configuring automations..."
