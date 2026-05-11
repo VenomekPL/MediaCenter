@@ -1,0 +1,44 @@
+services:
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    user: "0:0"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ${CONFIG_BASE_PATH}/loki:/loki
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+    restart: unless-stopped
+    profiles: ["extended", "full"]
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ${CONFIG_BASE_PATH}/promtail:/promtail
+    command: -config.file=/etc/promtail/config.yaml
+    restart: unless-stopped
+    depends_on:
+      - loki
+    profiles: ["extended", "full"]
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    user: "0:0"
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ${CONFIG_BASE_PATH}/grafana:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - ${GRAFANA_PORT:-8030}:3000
+    restart: unless-stopped
+    depends_on:
+      - loki
+    profiles: ["extended", "full"]

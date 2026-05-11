@@ -34,7 +34,7 @@ VIDEOS_PATH=$(dirname "$MOVIES_PATH")
 echo "Setting up service configurations..."
 
 # Create base directories
-mkdir -p "$CONFIG_BASE_PATH"/{transmission,radarr,sonarr,lidarr,prowlarr,homeassistant,gluetun,jellyfin,portainer}
+mkdir -p "$CONFIG_BASE_PATH"/{transmission,radarr,sonarr,lidarr,prowlarr,homeassistant,gluetun,jellyfin,portainer,loki,grafana,promtail}
 mkdir -p "$CONFIG_BASE_PATH/audiobookshelf"/{config,metadata}
 mkdir -p "$DOWNLOADS_PATH"/{incomplete,watch}
 mkdir -p "$MOVIES_PATH"

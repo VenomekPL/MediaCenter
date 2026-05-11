@@ -5,7 +5,7 @@ A modular, Docker-based media center solution optimized for Single Board Compute
 ## Features
 - **Native:** Kodi (with Elementum), Samba.
 - **Minimal:** Radarr, Sonarr, Transmission (+ Gluetun VPN).
-- **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, FlareSolverr, Watchtower.
+- **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, FlareSolverr, Watchtower, centralized logs (Loki + Promtail + Grafana).
 - **Full:** Extended + Home Assistant, Portainer, Jellyfin.
 - **Optimized Storage:** Uses "Unified Root" architecture (`/data`) to enable **Hardlinks**. Downloads are instantly imported to the library without taking up double space.
 - **VPN Protected:** All torrent traffic is routed through an encrypted VPN tunnel ([Gluetun](https://github.com/qdm12/gluetun)), keeping your activity private from your ISP. Built-in **kill switch** ensures torrents stop immediately if the VPN drops — no leaks, ever.
@@ -38,6 +38,7 @@ Optional but recommended:
 - **`API_KEY`** — Shared API key for all *arr apps. Default works out of the box; for production, generate one with `openssl rand -hex 16`.
 - **`TRAKT_USERNAME`** — Enables automatic watchlist sync in Radarr/Sonarr.
 - **`JELLYFIN_DRM_DEVICE`** — Hardware acceleration device path (e.g. `/dev/dri/renderD128`).
+- **`GRAFANA_ADMIN_PASSWORD`** — Grafana login for the logging UI (`extended` / `full` profile); change from the default.
 
 All available variables are documented in `.env.example` with comments.
 
@@ -73,8 +74,13 @@ docker compose ps
 | Jellyfin | `http://<ip>:8026` | full |
 | Home Assistant | `http://<ip>:8027` | full |
 | Portainer | `https://<ip>:9443` | full |
+| Grafana (logs) | `http://<ip>:8030` | extended, full |
 
 All ports are configurable via `.env`.
+
+### Centralized logs (extended / full)
+
+Grafana ships with a **Loki** data source. Sign in with `GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` from `.env`. Open **Explore**, choose **Loki**, then try LogQL such as `{container_name="gluetun"} |= "WARN"` or `|= "restarting VPN"` to audit VPN health over time. Logs are kept for **14 days** by default (`limits_config.retention_period` in [`modules/logging/loki-config.yaml`](modules/logging/loki-config.yaml)); Promtail discovers all Docker containers on the host (read-only access to the Docker socket and container log files). Loki and Grafana use **root** inside the container so bind-mounted data under `config/loki` and `config/grafana` remains writable regardless of host ownership (keep these services on your LAN).
 
 ## Post-Installation
 
@@ -155,6 +161,7 @@ python3 scripts/find_space_wasters.py
 │   ├── audiobookshelf/     ← Audiobook/podcast server
 │   ├── home-assistant/     ← Home automation
 │   ├── portainer/          ← Docker management UI
+│   ├── logging/            ← Loki + Promtail + Grafana (log retention)
 │   └── watchtower/         ← Auto-update containers
 ├── configs/                ← Template configs (pre-seeded on first run)
 ├── config/                 ← Live container configs (gitignored)

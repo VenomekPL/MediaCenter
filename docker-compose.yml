@@ -11,6 +11,7 @@ include:
   - modules/portainer/compose.yaml
   - modules/jellyfin/compose.yaml
   - modules/watchtower/compose.yaml
+  - modules/logging/compose.yaml
 
 services:
   # This file primarily serves as an entry point to include all modules.
