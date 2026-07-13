@@ -23,5 +23,6 @@
     "peer-limit-global": 1500,
     "peer-limit-per-torrent": 200,
     "download-queue-enabled": false,
-    "seed-queue-enabled": false
+    "seed-queue-enabled": false,
+    "port-forwarding-enabled": false
 }

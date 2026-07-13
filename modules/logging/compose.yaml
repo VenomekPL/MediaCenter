@@ -33,6 +33,7 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_LOG_FILTERS: "sqlstore.transactions:error,ssosettings.service:error,cleanup:error"
     volumes:
       - ${CONFIG_BASE_PATH}/grafana:/var/lib/grafana
       - ./grafana-provisioning:/etc/grafana/provisioning:ro
