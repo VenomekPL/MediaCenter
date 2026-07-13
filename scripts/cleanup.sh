@@ -18,18 +18,20 @@ echo "Starting Media Center Cleanup..."
 echo "Checking for finished torrents in Transmission..."
 
 # Get Session ID
-SESSION_ID=$(curl -s -I -u "$TRANSMISSION_USER:$TRANSMISSION_PASS" "http://localhost:$TRANSMISSION_PORT/transmission/rpc" | grep -i X-Transmission-Session-Id | cut -d' ' -f2 | tr -d '\r')
+# Use GET (not HEAD): Transmission returns 501 for HEAD on /transmission/rpc
+SESSION_ID=$(curl -s -D - -o /dev/null -u "$TRANSMISSION_USER:$TRANSMISSION_PASS" "http://localhost:$TRANSMISSION_PORT/transmission/rpc" | grep -i '^X-Transmission-Session-Id:' | awk '{print $2}' | tr -d '\r')
 
 if [ -n "$SESSION_ID" ]; then
-    # Get list of torrents that are finished (percentDone = 1 and not downloading)
-    # We use a simple heuristic: if they are finished and seeding, we can remove them if they meet criteria.
-    # For now, let's remove all torrents that are 100% done and stopped/finished.
-    
+    # Remove torrents that are finished (percentDone = 1) and either:
+    #   - stopped (status 0): reached seed-ratio limit (2.0) or manually stopped, or
+    #   - seeding (status 6) but already met the 2.0 ratio (safety net for the
+    #     brief window before Transmission flips them to stopped).
+    # Actively-seeding torrents below 2.0 are left alone so they can finish seeding.
     TORRENT_IDS=$(curl -s -u "$TRANSMISSION_USER:$TRANSMISSION_PASS" \
         -H "X-Transmission-Session-Id: $SESSION_ID" \
-        -d '{"method": "torrent-get", "arguments": {"fields": ["id", "percentDone", "status"]}}' \
+        -d '{"method": "torrent-get", "arguments": {"fields": ["id", "percentDone", "status", "uploadRatio"]}}' \
         "http://localhost:$TRANSMISSION_PORT/transmission/rpc" | \
-        jq -r '.arguments.torrents[] | select(.percentDone == 1 and (.status == 0 or .status == 6)) | .id')
+        jq -r '.arguments.torrents[] | select(.percentDone == 1 and (.status == 0 or (.status == 6 and .uploadRatio >= 2.0))) | .id')
 
     if [ -n "$TORRENT_IDS" ]; then
         for ID in $TORRENT_IDS; do

@@ -26,13 +26,12 @@ services:
       - SERVER_COUNTRIES=${VPN_SERVER_COUNTRIES:-}
       - SERVER_CITIES=${VPN_SERVER_CITIES:-}
       # DNS — use public DNS so healthcheck works even during tunnel setup
-      - DNS_ADDRESS=1.1.1.1
+      - DNS_UPSTREAM_PLAIN_ADDRESSES=1.1.1.1
       # --- Kill Switch & Firewall ---
       - FIREWALL_VPN_INPUT_PORTS=${FIREWALL_VPN_INPUT_PORTS:-51413}
       - FIREWALL_INPUT_PORTS=${FIREWALL_INPUT_PORTS:-9091}
       - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS:-172.16.0.0/12}
       # Health check timing
-      - HEALTH_VPN_DURATION_INITIAL=30s
       - HEALTH_SUCCESS_WAIT_DURATION=10s
     volumes:
       - ${CONFIG_BASE_PATH}/gluetun:/gluetun
