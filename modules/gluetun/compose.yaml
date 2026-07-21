@@ -26,7 +26,7 @@ services:
       - SERVER_COUNTRIES=${VPN_SERVER_COUNTRIES:-}
       - SERVER_CITIES=${VPN_SERVER_CITIES:-}
       # DNS — use public DNS so healthcheck works even during tunnel setup
-      - DNS_UPSTREAM_PLAIN_ADDRESSES=1.1.1.1
+      - DNS_UPSTREAM_PLAIN_ADDRESSES=1.1.1.1:53
       # --- Kill Switch & Firewall ---
       - FIREWALL_VPN_INPUT_PORTS=${FIREWALL_VPN_INPUT_PORTS:-51413}
       - FIREWALL_INPUT_PORTS=${FIREWALL_INPUT_PORTS:-9091}
