@@ -59,3 +59,13 @@ collections.json
 config/
 .native_installed
 *.zip
+
+# HDD / migration backups (can be hundreds of thousands of files)
+config.hdd-backup*/
+config*.backup*/
+*.hdd-backup*/
+
+# Local-only btrfs RAID1 maintenance (not part of the media stack)
+scripts/btrfs_raid1_balance.sh
+scripts/install_btrfs_balance_service.sh
+configs/systemd/

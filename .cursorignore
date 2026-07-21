@@ -1,0 +1,15 @@
+# Runtime / secrets
+config/
+.env
+.venv/
+venv/
+
+# HDD migration backup (huge; must not flood SCM / indexer)
+config.hdd-backup*/
+config*.backup*/
+*.hdd-backup*/
+
+# Local clutter
+*.log
+*.tmp
+__pycache__/
