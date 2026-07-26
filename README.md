@@ -4,11 +4,12 @@ A modular, Docker-based media center solution optimized for Single Board Compute
 
 ## Features
 - **Native:** Kodi (with Elementum), Samba.
-- **Minimal:** Radarr, Sonarr, Transmission (+ Gluetun VPN).
+- **Minimal:** Radarr, Sonarr, Transmission (+ Gluetun VPN), Download Guard.
 - **Extended:** Minimal + Audiobookshelf, Lidarr, Prowlarr, FlareSolverr, Watchtower, centralized logs (Loki + Promtail + Grafana).
 - **Full:** Extended + Home Assistant, Portainer, Jellyfin.
 - **Optimized Storage:** Uses "Unified Root" architecture (`/data`) to enable **Hardlinks**. Downloads are instantly imported to the library without taking up double space.
 - **VPN Protected:** All torrent traffic is routed through an encrypted VPN tunnel ([Gluetun](https://github.com/qdm12/gluetun)), keeping your activity private from your ISP. Built-in **kill switch** ensures torrents stop immediately if the VPN drops — no leaks, ever.
+- **Download Guard:** Sidecar that auto-fails junk imports (e.g. `.exe` bait), removes them from Transmission, blocklists the release, and lets Radarr/Sonarr search again.
 - **Fully Configurable:** All secrets, paths, ports, and API keys are read from a single `.env` file. Clone, configure, and go.
 
 ## Prerequisites
@@ -107,6 +108,13 @@ For detailed configuration (quality profiles, Trakt integration, download logic)
 ./scripts/cleanup.sh
 ```
 
+**Download Guard** runs automatically with the stack. To verify junk handling:
+```bash
+docker logs download-guard --tail 50
+# Loki/Grafana: {container_name="download-guard"}
+```
+Set `DOWNLOAD_GUARD_DRY_RUN=true` in `.env` and recreate the container to log matches without deleting.
+
 **Library audit** (find duplicates, fix hardlinks, check Sonarr/Radarr tracking):
 ```bash
 python3 scripts/library_audit.py --dry-run   # preview changes
@@ -154,6 +162,7 @@ python3 scripts/find_space_wasters.py
 │   ├── transmission/       ← Torrent client (routes through gluetun)
 │   ├── radarr/             ← Movie management
 │   ├── sonarr/             ← TV series management
+│   ├── download-guard/     ← Auto-fail junk torrent imports
 │   ├── lidarr/             ← Music management
 │   ├── prowlarr/           ← Indexer manager
 │   ├── flaresolverr/       ← Cloudflare CAPTCHA solver

@@ -58,13 +58,33 @@ Sonarr is designed to monitor entire seasons or series. To achieve your specific
 
 ### **Quality Profiles**
 We have pre-configured basic profiles via script:
-*   **Radarr:** Max ~66MB/min (~4GB/hour).
-*   **Sonarr:** Max ~25MB/min (~1.5GB/hour).
+*   **Radarr:** Max ~66MB/min (~4GB/hour). Quality language: **Original**. Custom formats score Original audio higher than dubs.
+*   **Sonarr:** Max ~25MB/min (~1.5GB/hour). Custom formats prefer **Original** language (Sonarr v4 language profiles are deprecated stubs).
 
 **To adjust manually:**
 1.  Go to **Settings** -> **Quality**.
 2.  Edit the **HD - 1080p** or create a new **4K** profile.
 3.  On the right side, adjust the **Quality Size** sliders.
+
+### **Download Guard (junk import handler)**
+The `download-guard` container ships with `minimal` / `extended` / `full`. It polls Radarr and Sonarr every `DOWNLOAD_GUARD_INTERVAL_SECONDS` (default 60). When a queue item is in `warning`/`error` with junk indicators (e.g. `Found executable`, `.exe` / `.bat` / `.msi`), it:
+
+1. Removes the torrent from Transmission (`removeFromClient=true`)
+2. Blocklists that release (`blocklist=true`)
+3. Allows *arr to search again (`skipRedownload=false`)
+
+**Env vars** (see `.env.example`):
+*   `DOWNLOAD_GUARD_INTERVAL_SECONDS=60`
+*   `DOWNLOAD_GUARD_DRY_RUN=false` — set `true` to log matches without deleting
+
+**Logs in Grafana (Loki):** `{container_name="download-guard"}`
+
+**Preventative rules** (applied by `link_services.sh`):
+*   Radarr/Sonarr release profiles ignore bait group `CYBER`
+*   Nyaa filtered to **Trusted only**; Sonarr compatibility enabled
+*   Indexer priority: YTS (15) > Nyaa (20) > 1337x / The Pirate Bay (25)
+*   Custom formats `Language Original` (+100) / `Language Not Original` (−10000) on Radarr & Sonarr quality profiles
+*   Japanese-original series retagged to `seriesType=anime`
 
 ---
 
@@ -72,8 +92,12 @@ We have pre-configured basic profiles via script:
 
 We have automated the addition of these trackers:
 *   **The Pirate Bay** (General)
-*   **Nyaa** (Anime)
+*   **Nyaa** (Anime — Trusted only)
 *   **1337x** (General)
+*   **YTS** (Movies — higher priority; safer against fake releases)
+*   **TorrentGalaxy** (General)
+
+**Trust signals:** Pirate Bay VIP badges are not exposed via Prowlarr. Nyaa **Trusted only** is the filter we enable. Known bait release groups (e.g. `CYBER`) are ignored via release profiles.
 
 **FlareSolverr Integration:**
 We have included **FlareSolverr** in the stack. This service automatically solves Cloudflare CAPTCHAs, which is required for sites like **1337x** and sometimes **The Pirate Bay**. Prowlarr is pre-configured to use FlareSolverr as a proxy for these indexers.

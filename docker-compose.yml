@@ -3,6 +3,7 @@ include:
   - modules/transmission/compose.yaml
   - modules/radarr/compose.yaml
   - modules/sonarr/compose.yaml
+  - modules/download-guard/compose.yaml
   - modules/audiobookshelf/compose.yaml
   - modules/lidarr/compose.yaml
   - modules/prowlarr/compose.yaml

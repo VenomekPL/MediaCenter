@@ -469,6 +469,7 @@ add_prowlarr_indexers() {
         local name=$1
         local def_file=$2
         local use_flare=$3
+        local priority=${4:-25}
         
         local tags_json="[]"
         if [ "$use_flare" == "true" ] && [ -n "$FLARESOLVERR_TAG_ID" ]; then
@@ -491,7 +492,7 @@ add_prowlarr_indexers() {
                 "configContract": "CardigannSettings",
                 "enable": true,
                 "protocol": "torrent",
-                "priority": 25,
+                "priority": '"$priority"',
                 "appProfileId": 1,
                 "tags": '"$tags_json"',
                 "fields": [
@@ -500,11 +501,274 @@ add_prowlarr_indexers() {
             }' > /dev/null
     }
 
-    add_cardigann_indexer "The Pirate Bay" "thepiratebay" "true"
-    add_cardigann_indexer "Nyaa" "nyaasi" "false"
-    add_cardigann_indexer "1337x" "1337x" "true"
-    add_cardigann_indexer "TorrentGalaxy" "torrentgalaxy" "true"
-    add_cardigann_indexer "YTS" "yts" "true"
+    add_cardigann_indexer "The Pirate Bay" "thepiratebay" "true" 25
+    add_cardigann_indexer "Nyaa" "nyaasi" "false" 20
+    add_cardigann_indexer "1337x" "1337x" "true" 25
+    add_cardigann_indexer "TorrentGalaxy" "torrentgalaxy" "true" 25
+    add_cardigann_indexer "YTS" "yts" "true" 15
+}
+
+upsert_release_profile_ignore() {
+    local port=$1
+    local app_name=$2
+    local profile_name=$3
+    local ignored_term=$4
+
+    echo "Configuring $app_name release profile '$profile_name' (ignore: $ignored_term)..."
+    local existing
+    existing=$(curl -s "http://$IP:$port/api/v3/releaseprofile?apiKey=$API_KEY" | jq -c --arg n "$profile_name" '.[] | select(.name == $n)')
+
+    local payload
+    payload=$(jq -n \
+        --arg name "$profile_name" \
+        --arg ignored "$ignored_term" \
+        '{name:$name, enabled:true, required:[], ignored:[$ignored], indexerId:0, tags:[]}')
+
+    local response status
+    if [ -n "$existing" ]; then
+        local id
+        id=$(echo "$existing" | jq -r '.id')
+        payload=$(echo "$payload" | jq --argjson id "$id" '.id = $id')
+        response=$(curl -s -w "\n%{http_code}" -X PUT "http://$IP:$port/api/v3/releaseprofile/$id?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+    else
+        response=$(curl -s -w "\n%{http_code}" -X POST "http://$IP:$port/api/v3/releaseprofile?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+    fi
+    status=$(echo "$response" | tail -1)
+    if [[ "$status" =~ ^2 ]]; then
+        echo "  - $app_name release profile configured."
+    else
+        echo "  - ERROR: Failed to configure $app_name release profile (HTTP $status)"
+    fi
+}
+
+configure_release_hygiene() {
+    upsert_release_profile_ignore "$RADARR_PORT" "Radarr" "Block CYBER bait" "CYBER"
+    upsert_release_profile_ignore "$SONARR_PORT" "Sonarr" "Block CYBER bait" "CYBER"
+}
+
+upsert_language_custom_format() {
+    local port=$1
+    local app_name=$2
+    local cf_name=$3
+    local negate=$4
+
+    echo "  - Upserting $app_name custom format '$cf_name'..."
+    local existing
+    existing=$(curl -s "http://$IP:$port/api/v3/customformat?apiKey=$API_KEY" | jq -c --arg n "$cf_name" '.[] | select(.name == $n)')
+
+    local payload
+    payload=$(jq -n \
+        --arg name "$cf_name" \
+        --argjson negate "$negate" \
+        '{
+            name: $name,
+            includeCustomFormatWhenRenaming: false,
+            specifications: [
+                {
+                    name: $name,
+                    implementation: "LanguageSpecification",
+                    negate: $negate,
+                    required: true,
+                    fields: [
+                        {name: "value", value: -2},
+                        {name: "exceptLanguage", value: false}
+                    ]
+                }
+            ]
+        }')
+
+    local response status
+    if [ -n "$existing" ]; then
+        local id
+        id=$(echo "$existing" | jq -r '.id')
+        payload=$(echo "$payload" | jq --argjson id "$id" '.id = $id')
+        response=$(curl -s -w "\n%{http_code}" -X PUT "http://$IP:$port/api/v3/customformat/$id?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+    else
+        response=$(curl -s -w "\n%{http_code}" -X POST "http://$IP:$port/api/v3/customformat?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+    fi
+    status=$(echo "$response" | tail -1)
+    if [[ "$status" =~ ^2 ]]; then
+        echo "    - OK"
+    else
+        echo "    - ERROR: HTTP $status"
+    fi
+}
+
+apply_language_format_scores() {
+    local port=$1
+    local app_name=$2
+    local original_score=$3
+    local not_original_score=$4
+
+    echo "  - Applying language format scores on $app_name quality profiles..."
+    local formats profiles
+    formats=$(curl -s "http://$IP:$port/api/v3/customformat?apiKey=$API_KEY")
+    local orig_id not_id
+    orig_id=$(echo "$formats" | jq -r '.[] | select(.name == "Language Original") | .id')
+    not_id=$(echo "$formats" | jq -r '.[] | select(.name == "Language Not Original") | .id')
+    if [ -z "$orig_id" ] || [ -z "$not_id" ] || [ "$orig_id" = "null" ] || [ "$not_id" = "null" ]; then
+        echo "    - ERROR: Language custom formats missing; skip scoring."
+        return
+    fi
+
+    profiles=$(curl -s "http://$IP:$port/api/v3/qualityprofile?apiKey=$API_KEY")
+    local id
+    for id in $(echo "$profiles" | jq -r '.[].id'); do
+        local profile updated status
+        profile=$(echo "$profiles" | jq -c --argjson id "$id" '.[] | select(.id == $id)')
+        updated=$(echo "$profile" | jq \
+            --argjson orig "$orig_id" \
+            --argjson notid "$not_id" \
+            --argjson oscore "$original_score" \
+            --argjson nscore "$not_original_score" '
+            .formatItems = (
+                ((.formatItems // [])
+                  | map(
+                      if .format == $orig or .name == "Language Original" then .score = $oscore
+                      elif .format == $notid or .name == "Language Not Original" then .score = $nscore
+                      else .
+                      end
+                    )
+                ) as $items
+                | $items
+                  + (if ($items | map(.format) | index($orig)) then [] else [{format:$orig, name:"Language Original", score:$oscore}] end)
+                  + (if ($items | map(.format) | index($notid)) then [] else [{format:$notid, name:"Language Not Original", score:$nscore}] end)
+            )
+        ')
+        status=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "http://$IP:$port/api/v3/qualityprofile/$id?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$updated")
+        if [[ ! "$status" =~ ^2 ]]; then
+            echo "    - ERROR: quality profile id=$id HTTP $status"
+        fi
+    done
+    echo "    - Scores set (Original=$original_score, Not Original=$not_original_score)."
+}
+
+configure_original_language_preference() {
+    # Sonarr v4 language profiles are deprecated stubs (API returns 202 but does not persist).
+    # Prefer Original audio via custom formats on quality profiles instead.
+    echo "Configuring Original-language preference (custom formats)..."
+    upsert_language_custom_format "$RADARR_PORT" "Radarr" "Language Original" false
+    upsert_language_custom_format "$RADARR_PORT" "Radarr" "Language Not Original" true
+    apply_language_format_scores "$RADARR_PORT" "Radarr" 100 -10000
+
+    upsert_language_custom_format "$SONARR_PORT" "Sonarr" "Language Original" false
+    upsert_language_custom_format "$SONARR_PORT" "Sonarr" "Language Not Original" true
+    apply_language_format_scores "$SONARR_PORT" "Sonarr" 100 -10000
+}
+
+retag_japanese_series_as_anime() {
+    echo "Retagging Japanese-original series as anime..."
+    local series
+    series=$(curl -s "http://$IP:$SONARR_PORT/api/v3/series?apiKey=$API_KEY")
+    local ids
+    ids=$(echo "$series" | jq -r '
+        .[]
+        | select((.originalLanguage.name // "") == "Japanese")
+        | select((.seriesType // "standard") == "standard")
+        | .id
+    ')
+
+    if [ -z "$ids" ]; then
+        echo "  - No Japanese standard series to retag."
+        return
+    fi
+
+    local id count=0
+    for id in $ids; do
+        local body
+        body=$(echo "$series" | jq -c --argjson id "$id" '.[] | select(.id == $id) | .seriesType = "anime"')
+        local status
+        status=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "http://$IP:$SONARR_PORT/api/v3/series/$id?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$body")
+        if [[ "$status" =~ ^2 ]]; then
+            count=$((count + 1))
+        else
+            echo "  - ERROR: Failed to retag series id=$id (HTTP $status)"
+        fi
+    done
+    echo "  - Retagged $count series to anime."
+}
+
+configure_prowlarr_indexer_hygiene() {
+    echo "Configuring Prowlarr indexer hygiene (Nyaa trusted, priorities)..."
+    local indexers
+    indexers=$(curl -s "http://$IP:$PROWLARR_PORT/api/v1/indexer?apiKey=$API_KEY")
+
+    set_indexer_priority() {
+        local name=$1
+        local priority=$2
+        local existing
+        existing=$(echo "$indexers" | jq -c --arg n "$name" '.[] | select(.name == $n)')
+        if [ -z "$existing" ]; then
+            echo "  - Skipping priority for $name (not found)."
+            return
+        fi
+        local current
+        current=$(echo "$existing" | jq -r '.priority')
+        if [ "$current" = "$priority" ]; then
+            echo "  - $name priority already $priority."
+            return
+        fi
+        local id payload status
+        id=$(echo "$existing" | jq -r '.id')
+        payload=$(echo "$existing" | jq --argjson p "$priority" '.priority = $p')
+        status=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "http://$IP:$PROWLARR_PORT/api/v1/indexer/$id?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+        if [[ "$status" =~ ^2 ]]; then
+            echo "  - $name priority set to $priority."
+            indexers=$(curl -s "http://$IP:$PROWLARR_PORT/api/v1/indexer?apiKey=$API_KEY")
+        else
+            echo "  - ERROR: Failed to set $name priority (HTTP $status)"
+        fi
+    }
+
+    configure_nyaa_trusted() {
+        local existing
+        existing=$(echo "$indexers" | jq -c '.[] | select(.name == "Nyaa")')
+        if [ -z "$existing" ]; then
+            echo "  - Skipping Nyaa trusted filter (indexer not found)."
+            return
+        fi
+
+        local id payload status
+        id=$(echo "$existing" | jq -r '.id')
+        payload=$(echo "$existing" | jq '
+            .priority = 20
+            | (.fields) |= map(
+                if .name == "filter-id" then .value = 2
+                elif .name == "sonarr_compatibility" then .value = true
+                else .
+                end
+              )
+        ')
+        status=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "http://$IP:$PROWLARR_PORT/api/v1/indexer/$id?apiKey=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+        if [[ "$status" =~ ^2 ]]; then
+            echo "  - Nyaa set to Trusted only + Sonarr compatibility."
+            indexers=$(curl -s "http://$IP:$PROWLARR_PORT/api/v1/indexer?apiKey=$API_KEY")
+        else
+            echo "  - ERROR: Failed to update Nyaa (HTTP $status)"
+        fi
+    }
+
+    configure_nyaa_trusted
+    set_indexer_priority "YTS" 15
+    set_indexer_priority "Nyaa" 20
+    set_indexer_priority "1337x" 25
+    set_indexer_priority "The Pirate Bay" 25
 }
 
 trigger_library_rescan() {
@@ -525,6 +789,7 @@ trigger_library_rescan() {
 if [[ "$PROFILE" == "extended" || "$PROFILE" == "full" ]]; then
     setup_flaresolverr_prowlarr
     add_prowlarr_indexers
+    configure_prowlarr_indexer_hygiene
 fi
 
 add_root_folder $RADARR_PORT "/data/Videos/Movies"
@@ -546,6 +811,11 @@ if [ ! -f ".config_applied" ]; then
 else
     echo "Skipping initial configuration (already applied)."
 fi
+
+# Idempotent release/language hygiene (safe to re-run)
+configure_release_hygiene
+configure_original_language_preference
+retag_japanese_series_as_anime
 
 add_trakt_list $RADARR_PORT "Radarr" "/data/Videos/Movies"
 add_trakt_list $SONARR_PORT "Sonarr" "/data/Videos/TvSeries"

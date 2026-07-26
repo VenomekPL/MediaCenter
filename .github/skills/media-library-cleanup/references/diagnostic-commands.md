@@ -46,6 +46,18 @@ curl -s -X DELETE -H "X-Api-Key: $KEY" \
   "http://localhost:8022/api/v3/queue/ITEM_ID?removeFromClient=true&blocklist=false&skipRedownload=true"
 ```
 
+### Fail + blocklist + redownload (same action as Download Guard)
+Use when a completed download is junk (e.g. executable instead of video). Removes it from Transmission, blocklists that release, and triggers a new search:
+```bash
+# Sonarr
+curl -s -X DELETE -H "X-Api-Key: $KEY" \
+  "http://localhost:8022/api/v3/queue/ITEM_ID?removeFromClient=true&blocklist=true&skipRedownload=false"
+
+# Radarr
+curl -s -X DELETE -H "X-Api-Key: $KEY" \
+  "http://localhost:8021/api/v3/queue/ITEM_ID?removeFromClient=true&blocklist=true&skipRedownload=false"
+```
+
 ### Update series path
 ```bash
 # 1. Get the series

@@ -1,0 +1,2 @@
+# Runtime uses stdlib only. pytest is installed in the image for docker-based tests.
+pytest==8.4.1
