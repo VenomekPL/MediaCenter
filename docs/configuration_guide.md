@@ -5,7 +5,7 @@ This guide explains the components of your Media Center, how to configure them, 
 ## 1. Component Overview
 
 ### **Watchtower**
-*   **What it is:** An automated updater for your Docker containers.
+*   **What it is:** An automated updater for your Docker containers (`nickfedor/watchtower`, the maintained fork of archived `containrrr/watchtower`).
 *   **How to use it:** It runs in the background. Once a day, it checks if newer versions of your apps (Radarr, Sonarr, etc.) are available. If yes, it downloads them and restarts the container automatically. You don't need to do anything.
 
 ### **Audiobookshelf**
